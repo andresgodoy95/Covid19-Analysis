@@ -59,5 +59,17 @@ ORDER BY Total_deathCount DESC
 
 **Insights:** Now we can see that almost all the biggest countries of each continent were the most affected by the pandemic in terms of total deaths, with the USA leading the board with more than +1 million deaths.
 
+### Q4 : What is the global death percentage rate per date?
+```sql
+SELECT date, sum(new_cases) as total_NewCases, SUM(new_deaths) as total_deaths, (SUM(new_deaths)/sum(new_cases))*100 AS DeathPercentage 
+from coviddeaths
+where continent<>''
+GROUP BY date
+order by 1,2
+```
+![image](https://user-images.githubusercontent.com/39070251/209875739-5ddc6086-c39f-4f03-9d7a-4d091b9d3e8e.png)
+![image](https://user-images.githubusercontent.com/39070251/209875792-816ef969-7373-469c-b363-383a237a2635.png)
+![image](https://user-images.githubusercontent.com/39070251/209875859-a191ca0b-afcb-40b7-a521-6b4c5435d93d.png)
+
 
 
