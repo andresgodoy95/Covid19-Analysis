@@ -132,12 +132,13 @@ GROUP BY dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinat
 ORDER BY 2,3
 )
 
-Select Location, Population, MAX(RollingPeopleVaccinated),MAX((RollingPeopleVaccinated/Population)) as vacs_pp
+Select Location, Population, MAX(RollingPeopleVaccinated) as Total_vaccinated ,MAX((RollingPeopleVaccinated/Population)) as vacs_pp
 from PopvsVac
 GROUP BY location, population
 ORDER BY vacs_pp DESC
 ```
-![image](https://user-images.githubusercontent.com/39070251/209980276-e73c0305-7309-4ea0-b804-661309989a6d.png)
+![image](https://user-images.githubusercontent.com/39070251/209989192-7917fa9e-2b15-4d16-a1e9-db35b2770a6f.png)
+
 
 **Insights:** The countries with the most effective vaccine campaign deploy were Chile, Cuba and Japan, with a mean of 3 vaccines per person in every country.
 
