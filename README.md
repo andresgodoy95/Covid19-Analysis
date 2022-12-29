@@ -71,5 +71,73 @@ order by 1,2
 ![image](https://user-images.githubusercontent.com/39070251/209875792-816ef969-7373-469c-b363-383a237a2635.png)
 ![image](https://user-images.githubusercontent.com/39070251/209875859-a191ca0b-afcb-40b7-a521-6b4c5435d93d.png)
 
+**Insights:** As we can see, covid´s death percentage is increasing through time, it would be interesting to see what was the peak of the trend and hoy many people were affected by the pandemic.
 
+### Q5: ¿How many people were affected by COVID-19?
+```sql
+SELECT sum(new_cases) as total_NewCases, SUM(new_deaths) as total_deaths, (SUM(new_deaths)/sum(new_cases))*100 AS DeathPercentage 
+from coviddeaths
+where continent<>''
+order by 1,2
+```
+![image](https://user-images.githubusercontent.com/39070251/209969640-433395d8-87e7-4244-bb80-fada2f6a68ab.png)
+
+**Insights**: More than +650M people got sick from COVID-19 around the world, from this aprox 1% died, that´s more than 6.5 million people. 
+
+### Q6: ¿How many people got vaccinated per country and per date? ¿ What was the accumulative number of vaccinated people?
+```sql
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(vac.new_vaccinations) OVER(PARTITION by dea.location ORDER BY dea.location, dea.date) as RollingPeopleVaccinated
+FROM coviddeaths dea
+JOIN covidvaccines vac ON dea.location = vac.location
+and dea.date = vac.date
+where dea.continent<>''
+ORDER BY 2,3
+```
+![image](https://user-images.githubusercontent.com/39070251/209988784-42570bba-4842-4556-894c-eaaaf5e696a7.png)
+
+**Insights:** Here we can see the levels of vaccinated people per conuntry and the evolution of this over time, it would be interesting to use this information to analyze how effective was the vaccination campaign over different countries and which got the best deploy strategy.
+
+### Q7: Over time, it was neccesary to delivery more than 1 vaccine to every person, so ¿ How many vaccines the mean population of every country had?
+```sql
+ With PopvsVac(Continent, Location, Date, Population, New_vaccinations, RollingPeopleVaccinated)
+ AS
+(
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(vac.new_vaccinations) OVER(PARTITION by dea.location ORDER BY dea.location, dea.date) as RollingPeopleVaccinated
+FROM coviddeaths dea
+JOIN covidvaccines vac ON dea.location = vac.location
+and dea.date = vac.date
+where dea.continent<>''
+GROUP BY dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+ORDER BY 2,3
+)
+Select *, (RollingPeopleVaccinated/Population) AS vacs_pp
+from PopvsVac
+ORDER BY vacs_pp DESC
+```
+![image](https://user-images.githubusercontent.com/39070251/209971799-b1f9c8ab-64d2-4ac2-8eb3-f1521783c7d4.png)
+
+**Insights:** With this query we can see the evolution of the vaccines deploy for every country, with CUBA leading the board with more than 3 vaccines per person.
+
+### Q8: Which Countries had the most effective vaccine campaign, measure by how many vaccines the population got?
+```sql
+ With PopvsVac(Continent, Location, Date, Population, New_vaccinations, RollingPeopleVaccinated)
+ AS
+(
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CAST(vac.new_vaccinations AS SIGNED)) OVER(PARTITION by dea.location ORDER BY dea.location, dea.date) as RollingPeopleVaccinated
+FROM coviddeaths dea
+JOIN covidvaccines vac ON dea.location = vac.location
+and dea.date = vac.date
+where dea.continent<>''
+GROUP BY dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+ORDER BY 2,3
+)
+
+Select Location, Population, MAX(RollingPeopleVaccinated),MAX((RollingPeopleVaccinated/Population)) as vacs_pp
+from PopvsVac
+GROUP BY location, population
+ORDER BY vacs_pp DESC
+```
+![image](https://user-images.githubusercontent.com/39070251/209980276-e73c0305-7309-4ea0-b804-661309989a6d.png)
+
+**Insights:** The countries with the most effective vaccine campaign deploy were Chile, Cuba and Japan, with a mean of 3 vaccines per person in every country.
 
